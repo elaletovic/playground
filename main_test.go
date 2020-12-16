@@ -1,23 +1,26 @@
 package main
 
 import (
+	"log"
 	"testing"
+
+	"gorm.io/gorm"
 )
 
 // GORM_REPO: https://github.com/go-gorm/gorm.git
 // GORM_BRANCH: master
 // TEST_DRIVERS: sqlite, mysql, postgres, sqlserver
 
-func TestGORM(t *testing.T) {
-	user := User{Name: "jinzhu"}
+// func TestGORM(t *testing.T) {
+// 	user := User{Name: "jinzhu"}
 
-	DB.Create(&user)
+// 	DB.Create(&user)
 
-	var result User
-	if err := DB.First(&result, user.ID).Error; err != nil {
-		t.Errorf("Failed, got error: %v", err)
-	}
-}
+// 	var result User
+// 	if err := DB.First(&result, user.ID).Error; err != nil {
+// 		t.Errorf("Failed, got error: %v", err)
+// 	}
+// }
 
 func TestPreloadWithSelect(t *testing.T) {
 	user1 := User{Name: "emin",
@@ -51,7 +54,12 @@ func TestPreloadWithSelect(t *testing.T) {
 	if err := DB.Preload("Languages").Find(&users); err.Error != nil {
 		t.Errorf("failed, got error: %v", err.Error)
 	}
-	log.Println(users)
+	for _, u := range users {
+		log.Println(u.Languages)
+		if len(u.Languages) == 0 {
+			t.Errorf("failed, missing languages for user %s", u.Name)
+		}
+	}
 
 	var users2 []User
 	//this works also
@@ -60,5 +68,9 @@ func TestPreloadWithSelect(t *testing.T) {
 	}).Find(&users2); err.Error != nil {
 		t.Errorf("failed, got error: %v", err.Error)
 	}
-	log.Println(users2)
+	for _, u := range users2 {
+		if len(u.Languages) == 0 {
+			t.Errorf("failed, missing languages for user %s", u.Name)
+		}
+	}
 }
